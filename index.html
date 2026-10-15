@@ -32,10 +32,7 @@
   }
   .app { max-width: 720px; margin: 0 auto; }
 
-  header {
-    text-align: center;
-    margin-bottom: 28px;
-  }
+  header { text-align: center; margin-bottom: 28px; }
   header h1 {
     font-size: 32px;
     background: linear-gradient(90deg, var(--pink), var(--purple));
@@ -55,21 +52,6 @@
     border: 1px solid rgba(255, 143, 171, 0.1);
   }
 
-    .tag.warning[data-tag="Yelling"],
-  .tag.warning[data-tag="Accusations"],
-  .tag.warning[data-tag="DARVO"],
-  .tag.warning[data-tag="Rage quitting"] {
-    background: #fff1f2;
-    border-color: #fecdd3;
-  }
-  .tag.warning[data-tag="Yelling"].selected,
-  .tag.warning[data-tag="Accusations"].selected,
-  .tag.warning[data-tag="DARVO"].selected,
-  .tag.warning[data-tag="Rage quitting"].selected {
-    background: #dc2626;
-    border-color: #dc2626;
-    color: white;
-  }
   .day-picker {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -109,13 +91,14 @@
     color: var(--muted);
     margin-bottom: 12px;
   }
-
-  .tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 20px;
+  .group-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 0 0 8px;
   }
+  .group-label.spaced { margin-top: 16px; }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; }
   .tag {
     padding: 8px 14px;
     border-radius: 100px;
@@ -135,6 +118,23 @@
   .tag.healthy.selected { background: #16a34a; border-color: #16a34a; }
   .tag.warning.selected { background: #f59e0b; border-color: #f59e0b; color: #fff; }
 
+  /* Heavier warning signs get their own red styling */
+  .tag.warning[data-tag="Yelling"],
+  .tag.warning[data-tag="Accusations"],
+  .tag.warning[data-tag="DARVO"],
+  .tag.warning[data-tag="Rage quitting"] {
+    background: #fff1f2;
+    border-color: #fecdd3;
+  }
+  .tag.warning[data-tag="Yelling"].selected,
+  .tag.warning[data-tag="Accusations"].selected,
+  .tag.warning[data-tag="DARVO"].selected,
+  .tag.warning[data-tag="Rage quitting"].selected {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: white;
+  }
+
   textarea {
     width: 100%;
     min-height: 90px;
@@ -149,6 +149,20 @@
     background: #fdfbff;
   }
   textarea:focus { border-color: var(--pink); }
+
+  input.text-input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1.5px solid #f3e8ff;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    background: #fdfbff;
+    margin-bottom: 10px;
+    transition: border 0.2s;
+  }
+  input.text-input:focus { border-color: var(--pink); }
 
   .actions { display: flex; gap: 12px; margin-top: 16px; }
   button.primary {
@@ -176,7 +190,6 @@
   }
   button.ghost:hover { border-color: var(--pink); color: var(--pink); }
 
-  /* Stats */
   .stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -193,7 +206,10 @@
   .stat.good .num { color: #16a34a; }
   .stat.bad .num { color: #dc2626; }
   .stat.neutral .num { color: var(--purple); }
-  .stat .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+  .stat .label {
+    font-size: 11px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.5px; margin-top: 2px;
+  }
 
   .balance-bar {
     height: 12px;
@@ -208,7 +224,6 @@
     transition: width 0.4s ease;
   }
 
-  /* Timeline */
   .entry {
     display: flex;
     gap: 12px;
@@ -234,7 +249,6 @@
   }
   .entry .delete:hover { color: #ef4444; }
 
-  /* Warning */
   .warning {
     background: #fffbeb;
     border: 1.5px solid #fde68a;
@@ -282,9 +296,54 @@
 
   .view { display: none; }
   .view.active { display: block; animation: fadeIn 0.3s; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
   .hidden { display: none !important; }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #f3e8ff;
+  }
+  .summary-row.warn { border-bottom-color: #fef3c7; }
+
+  .safety {
+    background: linear-gradient(135deg, #fdf2f8 0%, #ede9fe 100%);
+    border: 1.5px solid #e9d5ff;
+  }
+  .safety h3 {
+    color: #7e22ce;
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+  .safety p.small {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-bottom: 14px;
+  }
+  .safety label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .safety-field { margin-bottom: 14px; }
+  .saved-pill {
+    display: inline-block;
+    font-size: 11px;
+    color: #16a34a;
+    margin-left: 8px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .saved-pill.show { opacity: 1; }
 </style>
 </head>
 <body>
@@ -316,10 +375,10 @@
       </div>
     </div>
 
-       <div class="card" id="tags-card">
+    <div class="card" id="tags-card">
       <div class="section-title">What stood out?</div>
 
-      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">🌱 Healthy signs</div>
+      <div class="group-label">🌱 Healthy signs</div>
       <div class="tags" data-group="healthy">
         <div class="tag healthy" data-tag="Felt heard">Felt heard</div>
         <div class="tag healthy" data-tag="Kept my context">Kept my context</div>
@@ -342,7 +401,7 @@
         <div class="tag healthy" data-tag="Missed them (good)">Missed them (good)</div>
       </div>
 
-      <div style="font-size:12px;color:var(--muted);margin:16px 0 8px;">🌿 What I did today</div>
+      <div class="group-label spaced">🌿 What I did today</div>
       <div class="tags" data-group="healthy">
         <div class="tag healthy" data-tag="I reached out first">Reached out first</div>
         <div class="tag healthy" data-tag="I was honest about my feelings">Was honest about my feelings</div>
@@ -355,7 +414,7 @@
         <div class="tag healthy" data-tag="I stayed grounded">Stayed grounded in a hard moment</div>
       </div>
 
-      <div style="font-size:12px;color:var(--muted);margin:16px 0 8px;">⚠️ Worth noticing</div>
+      <div class="group-label spaced">⚠️ Worth noticing</div>
       <div class="tags" data-group="warning">
         <div class="tag warning" data-tag="Felt dismissed">Felt dismissed</div>
         <div class="tag warning" data-tag="Silent treatment">Silent treatment</div>
@@ -373,20 +432,6 @@
 
       <div id="darvo-hint" style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5;">
         <strong>DARVO</strong> = Deny, Attack, Reverse Victim &amp; Offender — when you raise a concern and end up the one apologizing.
-      </div>
-    </div>
-      <div id="tags-warning" style="margin-top:16px;">
-        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">⚠️ Worth noticing</div>
-        <div class="tags" data-group="warning">
-          <div class="tag warning" data-tag="Felt dismissed">Felt dismissed</div>
-          <div class="tag warning" data-tag="Silent treatment">Silent treatment</div>
-          <div class="tag warning" data-tag="Jealousy/control">Jealousy / control</div>
-          <div class="tag warning" data-tag="Guilt-tripped">Guilt-tripped</div>
-          <div class="tag warning" data-tag="Kept score">Kept score</div>
-          <div class="tag warning" data-tag="Gaslighting feeling">Felt gaslit</div>
-          <div class="tag warning" data-tag="Anxious after call">Anxious after call</div>
-          <div class="tag warning" data-tag="Walked on eggshells">Walked on eggshells</div>
-        </div>
       </div>
     </div>
 
@@ -455,6 +500,34 @@
       </p>
     </div>
 
+    <div class="card safety">
+      <h3>🛟 Safety plan (private to this browser)</h3>
+      <p class="small">
+        Just in case. You might not need this today — but having it here means one less thing to think about
+        if a hard moment comes. Nothing here is ever uploaded anywhere.
+      </p>
+
+      <div class="safety-field">
+        <label for="safe-person">A person I trust <span class="saved-pill" id="pill-person">✓ saved</span></label>
+        <input class="text-input" id="safe-person" placeholder="Name — not a phone number needed here" />
+      </div>
+
+      <div class="safety-field">
+        <label for="safe-phrase">A phrase I can text them <span class="saved-pill" id="pill-phrase">✓ saved</span></label>
+        <input class="text-input" id="safe-phrase" placeholder="e.g. 'just checking in, nothing urgent'" />
+      </div>
+
+      <div class="safety-field">
+        <label for="safe-place">A place I feel safe <span class="saved-pill" id="pill-place">✓ saved</span></label>
+        <input class="text-input" id="safe-place" placeholder="A friend's place, a café, a room in my home" />
+      </div>
+
+      <div class="safety-field">
+        <label for="safe-notes">Anything else I want to remember <span class="saved-pill" id="pill-notes">✓ saved</span></label>
+        <textarea id="safe-notes" placeholder="Grounding reminders, a boundary, a reminder that you're allowed to leave a call."></textarea>
+      </div>
+    </div>
+
     <div class="card">
       <div class="section-title">Healthy signs you've logged</div>
       <div id="healthy-summary" class="empty"><span class="emoji">🌱</span>Nothing yet — log a few days first.</div>
@@ -480,6 +553,7 @@
 
 <script>
 const STORAGE_KEY = 'ldr-tracker-entries-v1';
+const SAFETY_KEY = 'ldr-tracker-safety-v1';
 
 let entries = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
 let currentMood = null;
@@ -516,7 +590,7 @@ document.querySelectorAll('.tag').forEach(tag => {
   });
 });
 
-// --- Save ---
+// --- Save entry ---
 const saveBtn = document.getElementById('save-btn');
 function updateSaveBtn() { saveBtn.disabled = !currentMood; }
 
@@ -532,7 +606,6 @@ saveBtn.addEventListener('click', () => {
   });
   localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
   resetForm();
-  // little feedback
   saveBtn.textContent = '✓ Saved';
   setTimeout(() => { saveBtn.textContent = 'Save today'; }, 1200);
 });
@@ -547,7 +620,7 @@ function resetForm() {
 }
 document.getElementById('clear-btn').addEventListener('click', resetForm);
 
-// --- Timeline render ---
+// --- Timeline ---
 function renderTimeline() {
   const good = entries.filter(e => e.mood === 'good').length;
   const bad = entries.filter(e => e.mood === 'bad').length;
@@ -596,7 +669,6 @@ function renderTimeline() {
 
 function calcStreak() {
   if (!entries.length) return 0;
-  // unique days
   const days = new Set(entries.map(e => e.date.slice(0, 10)));
   let streak = 0;
   const today = new Date();
@@ -615,14 +687,13 @@ function renderReflect() {
   const healthyCounts = {};
   const warningCounts = {};
   entries.forEach(e => e.tags.forEach(t => {
-    // We don't store category, so look up
     const isWarning = document.querySelector(`.tag.warning[data-tag="${CSS.escape(t)}"]`);
     if (isWarning) warningCounts[t] = (warningCounts[t] || 0) + 1;
     else healthyCounts[t] = (healthyCounts[t] || 0) + 1;
   }));
 
-  const healthyTotal = Object.values(healthyCounts).reduce((a,b)=>a+b,0);
-  const warningTotal = Object.values(warningCounts).reduce((a,b)=>a+b,0);
+  const healthyTotal = Object.values(healthyCounts).reduce((a, b) => a + b, 0);
+  const warningTotal = Object.values(warningCounts).reduce((a, b) => a + b, 0);
 
   document.getElementById('reflect-warning').classList.toggle(
     'hidden',
@@ -630,41 +701,90 @@ function renderReflect() {
   );
 
   document.getElementById('healthy-summary').innerHTML = healthyTotal
-    ? Object.entries(healthyCounts).sort((a,b)=>b[1]-a[1])
-        .map(([k,v]) => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f3e8ff;"><span>🌱 ${escapeHtml(k)}</span><strong style="color:#16a34a;">${v}</strong></div>`).join('')
+    ? Object.entries(healthyCounts).sort((a, b) => b[1] - a[1])
+        .map(([k, v]) => `<div class="summary-row"><span>🌱 ${escapeHtml(k)}</span><strong style="color:#16a34a;">${v}</strong></div>`)
+        .join('')
     : '<div class="empty"><span class="emoji">🌱</span>Nothing yet — log a few days first.</div>';
 
   document.getElementById('warning-summary').innerHTML = warningTotal
-    ? Object.entries(warningCounts).sort((a,b)=>b[1]-a[1])
-        .map(([k,v]) => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #fef3c7;"><span>⚠️ ${escapeHtml(k)}</span><strong style="color:#dc2626;">${v}</strong></div>`).join('')
+    ? Object.entries(warningCounts).sort((a, b) => b[1] - a[1])
+        .map(([k, v]) => `<div class="summary-row warn"><span>⚠️ ${escapeHtml(k)}</span><strong style="color:#dc2626;">${v}</strong></div>`)
+        .join('')
     : '<div class="empty"><span class="emoji">⚠️</span>Nothing yet.</div>';
 }
 
+// --- Safety plan (local-only) ---
+const safetyFields = {
+  'safe-person': 'person',
+  'safe-phrase': 'phrase',
+  'safe-place': 'place',
+  'safe-notes': 'notes'
+};
+
+function loadSafety() {
+  const saved = JSON.parse(localStorage.getItem(SAFETY_KEY) || '{}');
+  Object.keys(safetyFields).forEach(id => {
+    const el = document.getElementById(id);
+    if (el && saved[safetyFields[id]]) el.value = saved[safetyFields[id]];
+  });
+}
+
+function saveSafetyField(id, key) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const saved = JSON.parse(localStorage.getItem(SAFETY_KEY) || '{}');
+  saved[key] = el.value;
+  localStorage.setItem(SAFETY_KEY, JSON.stringify(saved));
+  const pill = document.getElementById('pill-' + key);
+  if (pill) {
+    pill.classList.add('show');
+    setTimeout(() => pill.classList.remove('show'), 1200);
+  }
+}
+
+Object.entries(safetyFields).forEach(([id, key]) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('input', () => saveSafetyField(id, key));
+});
+
+loadSafety();
+
 // --- Export / Reset ---
 document.getElementById('export-btn').addEventListener('click', () => {
-  const blob = new Blob([JSON.stringify(entries, null, 2)], { type: 'application/json' });
+  const safety = JSON.parse(localStorage.getItem(SAFETY_KEY) || '{}');
+  const payload = { entries, safety, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `us-tracker-${new Date().toISOString().slice(0,10)}.json`;
+  a.download = `us-tracker-${new Date().toISOString().slice(0, 10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
 });
 
 document.getElementById('reset-btn').addEventListener('click', () => {
-  if (confirm('Delete all entries? This cannot be undone.')) {
+  if (confirm('Delete all entries and your safety plan? This cannot be undone.')) {
     entries = [];
     localStorage.setItem(STORAGE_KEY, '[]');
+    localStorage.removeItem(SAFETY_KEY);
+    Object.keys(safetyFields).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
     renderTimeline();
     renderReflect();
   }
 });
 
 function escapeHtml(s) {
-  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  return s.replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
 }
 
 updateSaveBtn();
+renderReflect();
 </script>
 </body>
 </html>
