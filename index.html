@@ -6,16 +6,16 @@
 <title>Us · A Space for Two</title>
 <style>
   :root {
-    --bg: #fdf6f9;
     --card: #ffffff;
     --pink: #ff8fab;
     --pink-soft: #ffd6e0;
     --purple: #a78bfa;
-    --green: #86efac;
+    --green: #22c55e;
     --green-soft: #dcfce7;
-    --red: #fca5a5;
+    --orange: #f59e0b;
+    --orange-soft: #fef3c7;
+    --red: #dc2626;
     --red-soft: #fee2e2;
-    --yellow: #fde68a;
     --text: #2d1b2e;
     --muted: #8b6b85;
     --shadow: 0 4px 24px rgba(255, 143, 171, 0.15);
@@ -27,14 +27,14 @@
     background: linear-gradient(160deg, #fff0f5 0%, #f3e8ff 100%);
     min-height: 100vh;
     color: var(--text);
-    padding: 24px 16px 100px;
+    padding: 24px 20px 80px;
     -webkit-font-smoothing: antialiased;
   }
-  .app { max-width: 720px; margin: 0 auto; }
+  .app { max-width: 860px; margin: 0 auto; }
 
-  header { text-align: center; margin-bottom: 28px; }
+  header { text-align: center; margin-bottom: 24px; }
   header h1 {
-    font-size: 32px;
+    font-size: 34px;
     background: linear-gradient(90deg, var(--pink), var(--purple));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -52,11 +52,44 @@
     border: 1px solid rgba(255, 143, 171, 0.1);
   }
 
+  .tabs {
+    display: flex;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 6px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+  }
+  .tab {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab.active {
+    background: white;
+    color: var(--pink);
+    box-shadow: 0 2px 8px rgba(255, 143, 171, 0.15);
+  }
+
+  .view { display: none; }
+  .view.active { display: block; animation: fadeIn 0.3s; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Log view */
   .day-picker {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 14px;
-    margin-bottom: 8px;
   }
   .mood-btn {
     padding: 28px 16px;
@@ -74,13 +107,13 @@
   .mood-btn .emoji { font-size: 36px; }
   .mood-btn.good { background: var(--green-soft); color: #166534; }
   .mood-btn.good:hover, .mood-btn.good.active {
-    background: var(--green); border-color: #22c55e; transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(134, 239, 172, 0.4);
+    background: #86efac; border-color: var(--green);
+    transform: translateY(-2px); box-shadow: 0 8px 20px rgba(134, 239, 172, 0.4);
   }
   .mood-btn.bad { background: var(--red-soft); color: #991b1b; }
   .mood-btn.bad:hover, .mood-btn.bad.active {
-    background: var(--red); border-color: #ef4444; transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(252, 165, 165, 0.4);
+    background: #fca5a5; border-color: var(--red);
+    transform: translateY(-2px); box-shadow: 0 8px 20px rgba(252, 165, 165, 0.4);
   }
 
   .section-title {
@@ -91,11 +124,7 @@
     color: var(--muted);
     margin-bottom: 12px;
   }
-  .group-label {
-    font-size: 12px;
-    color: var(--muted);
-    margin: 0 0 8px;
-  }
+  .group-label { font-size: 12px; color: var(--muted); margin: 0 0 8px; }
   .group-label.spaced { margin-top: 16px; }
 
   .tags { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -110,15 +139,10 @@
     user-select: none;
   }
   .tag:hover { border-color: var(--purple); }
-  .tag.selected {
-    background: var(--purple);
-    color: white;
-    border-color: var(--purple);
-  }
+  .tag.selected { background: var(--purple); color: white; border-color: var(--purple); }
   .tag.healthy.selected { background: #16a34a; border-color: #16a34a; }
-  .tag.warning.selected { background: #f59e0b; border-color: #f59e0b; color: #fff; }
+  .tag.warning.selected { background: var(--orange); border-color: var(--orange); color: #fff; }
 
-  /* Heavier warning signs get their own red styling */
   .tag.warning[data-tag="Yelling"],
   .tag.warning[data-tag="Accusations"],
   .tag.warning[data-tag="DARVO"],
@@ -130,8 +154,8 @@
   .tag.warning[data-tag="Accusations"].selected,
   .tag.warning[data-tag="DARVO"].selected,
   .tag.warning[data-tag="Rage quitting"].selected {
-    background: #dc2626;
-    border-color: #dc2626;
+    background: var(--red);
+    border-color: var(--red);
     color: white;
   }
 
@@ -145,8 +169,8 @@
     font-size: 14px;
     resize: vertical;
     outline: none;
-    transition: border 0.2s;
     background: #fdfbff;
+    transition: border 0.2s;
   }
   textarea:focus { border-color: var(--pink); }
 
@@ -190,21 +214,17 @@
   }
   button.ghost:hover { border-color: var(--pink); color: var(--pink); }
 
+  /* Stats */
   .stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
     margin-bottom: 8px;
   }
-  .stat {
-    text-align: center;
-    padding: 16px 8px;
-    border-radius: 16px;
-    background: #fdfbff;
-  }
+  .stat { text-align: center; padding: 16px 8px; border-radius: 16px; background: #fdfbff; }
   .stat .num { font-size: 26px; font-weight: 700; }
-  .stat.good .num { color: #16a34a; }
-  .stat.bad .num { color: #dc2626; }
+  .stat.good .num { color: var(--green); }
+  .stat.bad .num { color: var(--orange); }
   .stat.neutral .num { color: var(--purple); }
   .stat .label {
     font-size: 11px; color: var(--muted); text-transform: uppercase;
@@ -214,16 +234,128 @@
   .balance-bar {
     height: 12px;
     border-radius: 100px;
-    background: #fee2e2;
+    background: var(--orange-soft);
     overflow: hidden;
     margin-top: 16px;
   }
   .balance-fill {
     height: 100%;
-    background: linear-gradient(90deg, #22c55e, #86efac);
+    background: linear-gradient(90deg, var(--green), #86efac);
     transition: width 0.4s ease;
   }
 
+  /* Calendar */
+  .cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .cal-header h2 { font-size: 20px; color: var(--text); }
+  .cal-nav { display: flex; gap: 8px; }
+  .cal-nav button {
+    background: #fdfbff;
+    border: 1.5px solid #f3e8ff;
+    border-radius: 12px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .cal-nav button:hover { border-color: var(--pink); color: var(--pink); }
+
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+  .cal-day-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    text-align: center;
+    padding: 6px 0;
+    font-weight: 600;
+  }
+  .cal-cell {
+    aspect-ratio: 1 / 1;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 500;
+    background: #faf7fd;
+    color: var(--text);
+    position: relative;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .cal-cell.empty { background: transparent; }
+  .cal-cell.has-entry {
+    cursor: pointer;
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  .cal-cell.has-entry:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+    z-index: 2;
+  }
+  .cal-cell.good { background: linear-gradient(135deg, #22c55e, #4ade80); }
+  .cal-cell.hard { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+  .cal-cell.red  { background: linear-gradient(135deg, #dc2626, #ef4444); }
+  .cal-cell.today::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 14px;
+    border: 2px solid var(--purple);
+    pointer-events: none;
+  }
+
+  .cal-legend {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #f3e8ff;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+  }
+  .legend-swatch.good { background: linear-gradient(135deg, #22c55e, #4ade80); }
+  .legend-swatch.hard { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+  .legend-swatch.red  { background: linear-gradient(135deg, #dc2626, #ef4444); }
+  .legend-swatch.none { background: #faf7fd; border: 1px solid #f3e8ff; }
+
+  /* Day detail popup */
+  .day-detail {
+    margin-top: 16px;
+    padding: 16px;
+    border-radius: 16px;
+    background: #fdfbff;
+    border: 1.5px solid #f3e8ff;
+    font-size: 13px;
+  }
+  .day-detail h4 { font-size: 14px; margin-bottom: 8px; }
+  .day-detail .row { margin-top: 6px; }
+  .day-detail .tags-mini { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .day-detail .tags-mini span {
+    font-size: 11px; padding: 2px 8px; border-radius: 100px;
+    background: #f3e8ff; color: #6b21a8;
+  }
+
+  /* Timeline entries */
   .entry {
     display: flex;
     gap: 12px;
@@ -233,8 +365,9 @@
     margin-bottom: 10px;
     border-left: 4px solid var(--pink-soft);
   }
-  .entry.good { border-left-color: #22c55e; }
-  .entry.bad { border-left-color: #ef4444; }
+  .entry.good { border-left-color: var(--green); }
+  .entry.hard { border-left-color: var(--orange); }
+  .entry.red  { border-left-color: var(--red); }
   .entry .date { font-size: 12px; color: var(--muted); min-width: 70px; }
   .entry .content { flex: 1; }
   .entry .content .tags-mini { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
@@ -247,8 +380,9 @@
     background: none; border: none; color: #d1c4cf; cursor: pointer;
     font-size: 16px; padding: 0 4px; align-self: flex-start;
   }
-  .entry .delete:hover { color: #ef4444; }
+  .entry .delete:hover { color: var(--red); }
 
+  /* Warning block */
   .warning {
     background: #fffbeb;
     border: 1.5px solid #fde68a;
@@ -268,39 +402,6 @@
   }
   .empty .emoji { font-size: 40px; display: block; margin-bottom: 8px; opacity: 0.5; }
 
-  .tabs {
-    display: flex;
-    gap: 6px;
-    background: rgba(255, 255, 255, 0.7);
-    padding: 6px;
-    border-radius: 16px;
-    margin-bottom: 20px;
-  }
-  .tab {
-    flex: 1;
-    padding: 12px;
-    border-radius: 12px;
-    border: none;
-    background: transparent;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .tab.active {
-    background: white;
-    color: var(--pink);
-    box-shadow: 0 2px 8px rgba(255, 143, 171, 0.15);
-  }
-
-  .view { display: none; }
-  .view.active { display: block; animation: fadeIn 0.3s; }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
   .hidden { display: none !important; }
 
   .summary-row {
@@ -315,11 +416,7 @@
     background: linear-gradient(135deg, #fdf2f8 0%, #ede9fe 100%);
     border: 1.5px solid #e9d5ff;
   }
-  .safety h3 {
-    color: #7e22ce;
-    font-size: 15px;
-    margin-bottom: 10px;
-  }
+  .safety h3 { color: #7e22ce; font-size: 15px; margin-bottom: 10px; }
   .safety p.small {
     font-size: 12px;
     color: var(--muted);
@@ -338,12 +435,29 @@
   .saved-pill {
     display: inline-block;
     font-size: 11px;
-    color: #16a34a;
+    color: var(--green);
     margin-left: 8px;
     opacity: 0;
     transition: opacity 0.3s;
   }
   .saved-pill.show { opacity: 1; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #2d1b2e;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 100px;
+    font-size: 14px;
+    transition: transform 0.3s;
+    z-index: 999;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
@@ -355,6 +469,7 @@
 
   <div class="tabs">
     <button class="tab active" data-view="log">Today</button>
+    <button class="tab" data-view="calendar">Calendar</button>
     <button class="tab" data-view="timeline">Timeline</button>
     <button class="tab" data-view="reflect">Reflect</button>
   </div>
@@ -430,7 +545,7 @@
         <div class="tag warning" data-tag="Rage quitting">Rage quitting</div>
       </div>
 
-      <div id="darvo-hint" style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5;">
+      <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5;">
         <strong>DARVO</strong> = Deny, Attack, Reverse Victim &amp; Offender — when you raise a concern and end up the one apologizing.
       </div>
     </div>
@@ -442,6 +557,28 @@
         <button class="ghost" id="clear-btn">Clear</button>
         <button class="primary" id="save-btn" disabled>Save today</button>
       </div>
+    </div>
+  </div>
+
+  <!-- CALENDAR VIEW -->
+  <div class="view" id="view-calendar">
+    <div class="card">
+      <div class="cal-header">
+        <h2 id="cal-title">Month</h2>
+        <div class="cal-nav">
+          <button id="cal-prev">‹</button>
+          <button id="cal-today">Today</button>
+          <button id="cal-next">›</button>
+        </div>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div class="cal-legend">
+        <div class="legend-item"><div class="legend-swatch good"></div> Good day</div>
+        <div class="legend-item"><div class="legend-swatch hard"></div> Hard day</div>
+        <div class="legend-item"><div class="legend-swatch red"></div> Yelling / DARVO / Rage quitting / Accusations</div>
+        <div class="legend-item"><div class="legend-swatch none"></div> No entry</div>
+      </div>
+      <div id="day-detail" class="day-detail hidden"></div>
     </div>
   </div>
 
@@ -540,24 +677,50 @@
 
     <div class="card">
       <div class="section-title">Data</div>
-      <div class="actions">
-        <button class="ghost" id="export-btn" style="flex:1;">Export JSON</button>
-        <button class="ghost" id="reset-btn" style="flex:1;color:#dc2626;">Reset all</button>
+      <div class="actions" style="flex-wrap: wrap;">
+        <button class="ghost" id="export-btn" style="flex:1;min-width:120px;">⬇ Export JSON</button>
+        <button class="ghost" id="import-btn" style="flex:1;min-width:120px;">⬆ Import JSON</button>
+        <button class="ghost" id="reset-btn" style="flex:1;min-width:120px;color:var(--red);">Reset all</button>
       </div>
-      <p style="font-size:11px;color:var(--muted);margin-top:12px;text-align:center;">
-        Everything is stored only in this browser. Nothing is sent anywhere.
+      <input type="file" id="import-file" accept="application/json" class="hidden" />
+      <p style="font-size:11px;color:var(--muted);margin-top:12px;text-align:center;line-height:1.5;">
+        Everything is stored only in this browser. Nothing is sent anywhere.<br>
+        Export regularly for backup — importing will <strong>merge</strong> by date.
       </p>
     </div>
   </div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
 const STORAGE_KEY = 'ldr-tracker-entries-v1';
 const SAFETY_KEY = 'ldr-tracker-safety-v1';
 
+const HEAVY_WARNINGS = ['Yelling', 'Accusations', 'DARVO', 'Rage quitting'];
+
 let entries = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
 let currentMood = null;
 let currentTags = new Set();
+let calYear, calMonth; // month is 0-indexed
+
+// --- Helpers ---
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+function dateKey(iso) { return iso.slice(0, 10); }
+function todayKey() { return new Date().toISOString().slice(0, 10); }
+
+function dayColor(key) {
+  const dayEntries = entries.filter(e => dateKey(e.date) === key);
+  if (!dayEntries.length) return null;
+  const hasHeavy = dayEntries.some(e => e.tags.some(t => HEAVY_WARNINGS.includes(t)));
+  if (hasHeavy) return 'red';
+  if (dayEntries.some(e => e.mood === 'bad')) return 'hard';
+  return 'good';
+}
 
 // --- Tabs ---
 document.querySelectorAll('.tab').forEach(tab => {
@@ -568,6 +731,7 @@ document.querySelectorAll('.tab').forEach(tab => {
     document.getElementById('view-' + tab.dataset.view).classList.add('active');
     if (tab.dataset.view === 'timeline') renderTimeline();
     if (tab.dataset.view === 'reflect') renderReflect();
+    if (tab.dataset.view === 'calendar') renderCalendar();
   });
 });
 
@@ -590,7 +754,7 @@ document.querySelectorAll('.tag').forEach(tag => {
   });
 });
 
-// --- Save entry ---
+// --- Save ---
 const saveBtn = document.getElementById('save-btn');
 function updateSaveBtn() { saveBtn.disabled = !currentMood; }
 
@@ -608,6 +772,7 @@ saveBtn.addEventListener('click', () => {
   resetForm();
   saveBtn.textContent = '✓ Saved';
   setTimeout(() => { saveBtn.textContent = 'Save today'; }, 1200);
+  toast('Saved 💾');
 });
 
 function resetForm() {
@@ -648,10 +813,13 @@ function renderTimeline() {
       ? `<div class="tags-mini">${e.tags.map(t => `<span>${escapeHtml(t)}</span>`).join('')}</div>`
       : '';
     const noteHtml = e.note ? `<div class="note">${escapeHtml(e.note)}</div>` : '';
-    return `<div class="entry ${e.mood}">
+    const cls = dayColor(dateKey(e.date)) || (e.mood === 'good' ? 'good' : 'hard');
+    const label = cls === 'red' ? '🔴 Heavy day'
+                : e.mood === 'good' ? '💚 Good day' : '💔 Hard day';
+    return `<div class="entry ${cls}">
       <div class="date">${dateStr}<br><span style="opacity:.6">${timeStr}</span></div>
       <div class="content">
-        <div style="font-size:13px;font-weight:600;">${e.mood === 'good' ? '💚 Good day' : '💔 Hard day'}</div>
+        <div style="font-size:13px;font-weight:600;">${label}</div>
         ${noteHtml}${tagsHtml}
       </div>
       <button class="delete" data-id="${e.id}">✕</button>
@@ -669,7 +837,7 @@ function renderTimeline() {
 
 function calcStreak() {
   if (!entries.length) return 0;
-  const days = new Set(entries.map(e => e.date.slice(0, 10)));
+  const days = new Set(entries.map(e => dateKey(e.date)));
   let streak = 0;
   const today = new Date();
   for (let i = 0; i < 365; i++) {
@@ -680,6 +848,109 @@ function calcStreak() {
     else if (i > 0) break;
   }
   return streak;
+}
+
+// --- Calendar (Sunday-first) ---
+function renderCalendar() {
+  if (calYear === undefined) {
+    const now = new Date();
+    calYear = now.getFullYear();
+    calMonth = now.getMonth();
+  }
+
+  const monthNames = ['January','February','March','April','May','June',
+    'July','August','September','October','November','December'];
+  document.getElementById('cal-title').textContent = `${monthNames[calMonth]} ${calYear}`;
+
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+
+  // Sunday-first headers
+  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'cal-day-label';
+    el.textContent = d;
+    grid.appendChild(el);
+  });
+
+  const first = new Date(calYear, calMonth, 1);
+  // JS getDay() is already Sunday-first (0=Sun), so no shift needed
+  const firstWeekday = first.getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const todayStr = todayKey();
+
+  for (let i = 0; i < firstWeekday; i++) {
+    const el = document.createElement('div');
+    el.className = 'cal-cell empty';
+    grid.appendChild(el);
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const d = new Date(calYear, calMonth, day);
+    const key = d.toISOString().slice(0, 10);
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell';
+    cell.textContent = day;
+    if (key === todayStr) cell.classList.add('today');
+
+    const color = dayColor(key);
+    if (color) {
+      cell.classList.add('has-entry', color);
+      cell.addEventListener('click', () => showDayDetail(key));
+    }
+    grid.appendChild(cell);
+  }
+}
+
+document.getElementById('cal-prev').addEventListener('click', () => {
+  calMonth--;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderCalendar();
+  document.getElementById('day-detail').classList.add('hidden');
+});
+document.getElementById('cal-next').addEventListener('click', () => {
+  calMonth++;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderCalendar();
+  document.getElementById('day-detail').classList.add('hidden');
+});
+document.getElementById('cal-today').addEventListener('click', () => {
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+  renderCalendar();
+  showDayDetail(todayKey());
+});
+
+function showDayDetail(key) {
+  const dayEntries = entries.filter(e => dateKey(e.date) === key);
+  const detail = document.getElementById('day-detail');
+  if (!dayEntries.length) { detail.classList.add('hidden'); return; }
+
+  const d = new Date(key + 'T12:00:00');
+  const dateStr = d.toLocaleDateString(undefined, {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
+
+  const color = dayColor(key);
+  const badge = color === 'red' ? '🔴 Heavy day'
+              : color === 'hard' ? '🟠 Hard day'
+              : '🟢 Good day';
+
+  detail.innerHTML = `
+    <h4>${dateStr} — ${badge}</h4>
+    ${dayEntries.map(e => `
+      <div class="row">
+        <strong>${e.mood === 'good' ? '💚 Good' : '💔 Hard'}</strong>
+        <span style="color:var(--muted);font-size:11px;margin-left:6px;">
+          ${new Date(e.date).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+        </span>
+        ${e.note ? `<div style="margin-top:4px;">${escapeHtml(e.note)}</div>` : ''}
+        ${e.tags.length ? `<div class="tags-mini">${e.tags.map(t => `<span>${escapeHtml(t)}</span>`).join('')}</div>` : ''}
+      </div>
+    `).join('')}
+  `;
+  detail.classList.remove('hidden');
 }
 
 // --- Reflect ---
@@ -694,26 +965,27 @@ function renderReflect() {
 
   const healthyTotal = Object.values(healthyCounts).reduce((a, b) => a + b, 0);
   const warningTotal = Object.values(warningCounts).reduce((a, b) => a + b, 0);
+  const heavyTotal = HEAVY_WARNINGS.reduce((sum, t) => sum + (warningCounts[t] || 0), 0);
 
   document.getElementById('reflect-warning').classList.toggle(
     'hidden',
-    warningTotal <= healthyTotal || entries.length < 3
+    (warningTotal <= healthyTotal && heavyTotal === 0) || entries.length < 3
   );
 
   document.getElementById('healthy-summary').innerHTML = healthyTotal
     ? Object.entries(healthyCounts).sort((a, b) => b[1] - a[1])
-        .map(([k, v]) => `<div class="summary-row"><span>🌱 ${escapeHtml(k)}</span><strong style="color:#16a34a;">${v}</strong></div>`)
+        .map(([k, v]) => `<div class="summary-row"><span>🌱 ${escapeHtml(k)}</span><strong style="color:var(--green);">${v}</strong></div>`)
         .join('')
     : '<div class="empty"><span class="emoji">🌱</span>Nothing yet — log a few days first.</div>';
 
   document.getElementById('warning-summary').innerHTML = warningTotal
     ? Object.entries(warningCounts).sort((a, b) => b[1] - a[1])
-        .map(([k, v]) => `<div class="summary-row warn"><span>⚠️ ${escapeHtml(k)}</span><strong style="color:#dc2626;">${v}</strong></div>`)
+        .map(([k, v]) => `<div class="summary-row warn"><span>⚠️ ${escapeHtml(k)}</span><strong style="color:var(--red);">${v}</strong></div>`)
         .join('')
     : '<div class="empty"><span class="emoji">⚠️</span>Nothing yet.</div>';
 }
 
-// --- Safety plan (local-only) ---
+// --- Safety plan ---
 const safetyFields = {
   'safe-person': 'person',
   'safe-phrase': 'phrase',
@@ -750,10 +1022,15 @@ Object.entries(safetyFields).forEach(([id, key]) => {
 
 loadSafety();
 
-// --- Export / Reset ---
+// --- Export / Import / Reset ---
 document.getElementById('export-btn').addEventListener('click', () => {
   const safety = JSON.parse(localStorage.getItem(SAFETY_KEY) || '{}');
-  const payload = { entries, safety, exportedAt: new Date().toISOString() };
+  const payload = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    entries,
+    safety
+  };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -761,6 +1038,57 @@ document.getElementById('export-btn').addEventListener('click', () => {
   a.download = `us-tracker-${new Date().toISOString().slice(0, 10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
+  toast('Exported ⬇');
+});
+
+document.getElementById('import-btn').addEventListener('click', () => {
+  document.getElementById('import-file').click();
+});
+
+document.getElementById('import-file').addEventListener('change', (ev) => {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      const incoming = Array.isArray(data) ? data : (data.entries || []);
+      if (!Array.isArray(incoming)) throw new Error('bad shape');
+
+      const byId = new Map(entries.map(en => [en.id, en]));
+      let added = 0;
+      incoming.forEach(en => {
+        if (!en || typeof en !== 'object' || !en.date || !en.mood) return;
+        if (!byId.has(en.id)) {
+          byId.set(en.id, en);
+          added++;
+        }
+      });
+      entries = [...byId.values()].sort((a, b) => new Date(b.date) - new Date(a.date));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+
+      if (data.safety && typeof data.safety === 'object') {
+        const current = JSON.parse(localStorage.getItem(SAFETY_KEY) || '{}');
+        let changed = false;
+        Object.keys(safetyFields).forEach(key => {
+          if (data.safety[key] && !current[key]) { current[key] = data.safety[key]; changed = true; }
+        });
+        if (changed) {
+          localStorage.setItem(SAFETY_KEY, JSON.stringify(current));
+          loadSafety();
+        }
+      }
+
+      renderTimeline();
+      renderReflect();
+      renderCalendar();
+      toast(`Imported ${added} ${added === 1 ? 'entry' : 'entries'} ✅`);
+    } catch (err) {
+      toast('Import failed — not a valid file ❌');
+    }
+    ev.target.value = '';
+  };
+  reader.readAsText(file);
 });
 
 document.getElementById('reset-btn').addEventListener('click', () => {
@@ -774,16 +1102,34 @@ document.getElementById('reset-btn').addEventListener('click', () => {
     });
     renderTimeline();
     renderReflect();
+    renderCalendar();
+    toast('Cleared');
   }
 });
 
-function escapeHtml(s) {
-  return s.replace(/[&<>"']/g, c => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-  }[c]));
+// --- Toast ---
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
 }
 
+// --- Keyboard shortcut ---
+document.addEventListener('keydown', (e) => {
+  const logView = document.getElementById('view-log').classList.contains('active');
+  if (!logView) return;
+  const tag = e.target.tagName;
+  if (tag === 'TEXTAREA' || tag === 'INPUT') return;
+  if (e.key === '1') document.querySelector('.mood-btn.good').click();
+  if (e.key === '2') document.querySelector('.mood-btn.bad').click();
+});
+
+// --- Init ---
 updateSaveBtn();
+renderTimeline();
 renderReflect();
 </script>
 </body>
