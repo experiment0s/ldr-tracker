@@ -291,16 +291,16 @@
     background: #faf7fd;
     color: var(--text);
     position: relative;
+    cursor: pointer;
     transition: transform 0.15s, box-shadow 0.15s;
   }
-  .cal-cell.empty { background: transparent; }
+  .cal-cell.empty { background: transparent; cursor: default; }
   .cal-cell.has-entry {
-    cursor: pointer;
     color: white;
     font-weight: 700;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
-  .cal-cell.has-entry:hover {
+  .cal-cell:hover:not(.empty) {
     transform: translateY(-2px) scale(1.05);
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
     z-index: 2;
@@ -315,6 +315,10 @@
     border-radius: 14px;
     border: 2px solid var(--purple);
     pointer-events: none;
+  }
+  .cal-cell.selected {
+    outline: 3px solid var(--purple);
+    outline-offset: 2px;
   }
 
   .cal-legend {
@@ -338,21 +342,56 @@
   .legend-swatch.red  { background: linear-gradient(135deg, #dc2626, #ef4444); }
   .legend-swatch.none { background: #faf7fd; border: 1px solid #f3e8ff; }
 
-  /* Day detail popup */
-  .day-detail {
-    margin-top: 16px;
-    padding: 16px;
-    border-radius: 16px;
-    background: #fdfbff;
-    border: 1.5px solid #f3e8ff;
-    font-size: 13px;
+  /* Calendar day editor panel */
+  .day-editor {
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #fdf2f8 0%, #ede9fe 100%);
+    border: 1.5px solid #e9d5ff;
+    animation: fadeIn 0.25s;
   }
-  .day-detail h4 { font-size: 14px; margin-bottom: 8px; }
-  .day-detail .row { margin-top: 6px; }
-  .day-detail .tags-mini { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
-  .day-detail .tags-mini span {
-    font-size: 11px; padding: 2px 8px; border-radius: 100px;
-    background: #f3e8ff; color: #6b21a8;
+  .day-editor h3 {
+    font-size: 16px;
+    margin-bottom: 4px;
+    color: #6b21a8;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .day-editor .sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .day-editor .close-btn {
+    background: white;
+    border: 1.5px solid #e9d5ff;
+    color: var(--muted);
+    border-radius: 10px;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .day-editor .close-btn:hover { color: var(--red); border-color: var(--red); }
+
+  .existing-entries {
+    margin-bottom: 20px;
+  }
+  .existing-entries .entry {
+    background: white;
+    border: 1.5px solid #f3e8ff;
+  }
+
+  .day-editor .day-picker { margin-bottom: 16px; }
+  .day-editor .mood-btn { padding: 20px 12px; font-size: 14px; }
+  .day-editor .mood-btn .emoji { font-size: 28px; }
+  .day-editor .tags { margin-bottom: 4px; }
+  .day-editor textarea {
+    background: white;
+    border-color: #e9d5ff;
+    min-height: 80px;
   }
 
   /* Timeline entries */
@@ -474,7 +513,7 @@
     <button class="tab" data-view="reflect">Reflect</button>
   </div>
 
-  <!-- LOG VIEW -->
+  <!-- LOG VIEW (Today) -->
   <div class="view active" id="view-log">
     <div class="card">
       <div class="section-title">How was today?</div>
@@ -576,9 +615,11 @@
         <div class="legend-item"><div class="legend-swatch good"></div> Good day</div>
         <div class="legend-item"><div class="legend-swatch hard"></div> Hard day</div>
         <div class="legend-item"><div class="legend-swatch red"></div> Yelling / DARVO / Rage quitting / Accusations</div>
-        <div class="legend-item"><div class="legend-swatch none"></div> No entry</div>
+        <div class="legend-item"><div class="legend-swatch none"></div> No entry — click to add</div>
       </div>
-      <div id="day-detail" class="day-detail hidden"></div>
+
+      <!-- Inline day editor (hidden until a day is clicked) -->
+      <div id="day-editor" class="day-editor hidden"></div>
     </div>
   </div>
 
@@ -699,10 +740,28 @@ const SAFETY_KEY = 'ldr-tracker-safety-v1';
 
 const HEAVY_WARNINGS = ['Yelling', 'Accusations', 'DARVO', 'Rage quitting'];
 
+const HEALTHY_TAGS = [
+  "Felt heard","Kept my context","Followed through","Quality time","Laughed together",
+  "Supported me","Respected boundaries","Honest talk","Told me the truth, even when hard",
+  "Reassured without being asked","Showed up on a bad day","Kept me included",
+  "Respected my other life","Made time zones work","Planned something to look forward to",
+  "Owned a mistake","Checked in on me","Kept intimacy alive","Missed them (good)",
+  "I reached out first","I was honest about my feelings","I asked a real question",
+  "I made time for them","I gave space","I apologized","I planned something",
+  "I let them in","I stayed grounded"
+];
+
+const WARNING_TAGS = [
+  "Felt dismissed","Silent treatment","Jealousy/control","Guilt-tripped","Kept score",
+  "Gaslighting feeling","Anxious after call","Walked on eggshells",
+  "Yelling","Accusations","DARVO","Rage quitting"
+];
+
 let entries = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
 let currentMood = null;
 let currentTags = new Set();
-let calYear, calMonth; // month is 0-indexed
+let calYear, calMonth;
+let selectedDayKey = null; // for calendar editor
 
 // --- Helpers ---
 function escapeHtml(s) {
@@ -711,7 +770,22 @@ function escapeHtml(s) {
   }[c]));
 }
 function dateKey(iso) { return iso.slice(0, 10); }
-function todayKey() { return new Date().toISOString().slice(0, 10); }
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+// Build a full ISO timestamp for a given YYYY-MM-DD key, preserving
+// current clock time when the day is today, otherwise noon of that day.
+function isoForDay(key) {
+  if (key === todayKey()) return new Date().toISOString();
+  return new Date(key + 'T12:00:00').toISOString();
+}
+function humanDate(key) {
+  const d = new Date(key + 'T12:00:00');
+  return d.toLocaleDateString(undefined, {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
+}
 
 function dayColor(key) {
   const dayEntries = entries.filter(e => dateKey(e.date) === key);
@@ -735,18 +809,18 @@ document.querySelectorAll('.tab').forEach(tab => {
   });
 });
 
-// --- Mood picker ---
-document.querySelectorAll('.mood-btn').forEach(btn => {
+// --- Today form: mood picker ---
+document.querySelectorAll('#view-log .mood-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#view-log .mood-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     currentMood = btn.dataset.mood;
     updateSaveBtn();
   });
 });
 
-// --- Tags ---
-document.querySelectorAll('.tag').forEach(tag => {
+// --- Today form: tags ---
+document.querySelectorAll('#view-log .tag').forEach(tag => {
   tag.addEventListener('click', () => {
     const t = tag.dataset.tag;
     if (currentTags.has(t)) { currentTags.delete(t); tag.classList.remove('selected'); }
@@ -754,7 +828,7 @@ document.querySelectorAll('.tag').forEach(tag => {
   });
 });
 
-// --- Save ---
+// --- Today form: save ---
 const saveBtn = document.getElementById('save-btn');
 function updateSaveBtn() { saveBtn.disabled = !currentMood; }
 
@@ -778,8 +852,8 @@ saveBtn.addEventListener('click', () => {
 function resetForm() {
   currentMood = null;
   currentTags.clear();
-  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tag').forEach(t => t.classList.remove('selected'));
+  document.querySelectorAll('#view-log .mood-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#view-log .tag').forEach(t => t.classList.remove('selected'));
   document.getElementById('note').value = '';
   updateSaveBtn();
 }
@@ -805,34 +879,37 @@ function renderTimeline() {
     list.innerHTML = '<div class="empty"><span class="emoji">🌙</span>No entries yet. Start with today.</div>';
     return;
   }
-  list.innerHTML = entries.slice(0, 60).map(e => {
-    const d = new Date(e.date);
-    const dateStr = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-    const timeStr = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-    const tagsHtml = e.tags.length
-      ? `<div class="tags-mini">${e.tags.map(t => `<span>${escapeHtml(t)}</span>`).join('')}</div>`
-      : '';
-    const noteHtml = e.note ? `<div class="note">${escapeHtml(e.note)}</div>` : '';
-    const cls = dayColor(dateKey(e.date)) || (e.mood === 'good' ? 'good' : 'hard');
-    const label = cls === 'red' ? '🔴 Heavy day'
-                : e.mood === 'good' ? '💚 Good day' : '💔 Hard day';
-    return `<div class="entry ${cls}">
-      <div class="date">${dateStr}<br><span style="opacity:.6">${timeStr}</span></div>
-      <div class="content">
-        <div style="font-size:13px;font-weight:600;">${label}</div>
-        ${noteHtml}${tagsHtml}
-      </div>
-      <button class="delete" data-id="${e.id}">✕</button>
-    </div>`;
-  }).join('');
+  list.innerHTML = entries.slice(0, 60).map(e => entryHtml(e)).join('');
 
   list.querySelectorAll('.delete').forEach(btn => {
     btn.addEventListener('click', () => {
       entries = entries.filter(e => e.id !== Number(btn.dataset.id));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
       renderTimeline();
+      renderCalendar();
     });
   });
+}
+
+function entryHtml(e) {
+  const d = new Date(e.date);
+  const dateStr = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  const timeStr = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  const tagsHtml = e.tags.length
+    ? `<div class="tags-mini">${e.tags.map(t => `<span>${escapeHtml(t)}</span>`).join('')}</div>`
+    : '';
+  const noteHtml = e.note ? `<div class="note">${escapeHtml(e.note)}</div>` : '';
+  const cls = dayColor(dateKey(e.date)) || (e.mood === 'good' ? 'good' : 'hard');
+  const label = cls === 'red' ? '🔴 Heavy day'
+              : e.mood === 'good' ? '💚 Good day' : '💔 Hard day';
+  return `<div class="entry ${cls}">
+    <div class="date">${dateStr}<br><span style="opacity:.6">${timeStr}</span></div>
+    <div class="content">
+      <div style="font-size:13px;font-weight:600;">${label}</div>
+      ${noteHtml}${tagsHtml}
+    </div>
+    <button class="delete" data-id="${e.id}">✕</button>
+  </div>`;
 }
 
 function calcStreak() {
@@ -843,7 +920,7 @@ function calcStreak() {
   for (let i = 0; i < 365; i++) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
-    const key = d.toISOString().slice(0, 10);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     if (days.has(key)) streak++;
     else if (i > 0) break;
   }
@@ -865,7 +942,6 @@ function renderCalendar() {
   const grid = document.getElementById('cal-grid');
   grid.innerHTML = '';
 
-  // Sunday-first headers
   ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => {
     const el = document.createElement('div');
     el.className = 'cal-day-label';
@@ -874,7 +950,6 @@ function renderCalendar() {
   });
 
   const first = new Date(calYear, calMonth, 1);
-  // JS getDay() is already Sunday-first (0=Sun), so no shift needed
   const firstWeekday = first.getDay();
   const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
   const todayStr = todayKey();
@@ -887,17 +962,17 @@ function renderCalendar() {
 
   for (let day = 1; day <= daysInMonth; day++) {
     const d = new Date(calYear, calMonth, day);
-    const key = d.toISOString().slice(0, 10);
+    const key = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
     const cell = document.createElement('div');
     cell.className = 'cal-cell';
     cell.textContent = day;
     if (key === todayStr) cell.classList.add('today');
+    if (key === selectedDayKey) cell.classList.add('selected');
 
     const color = dayColor(key);
-    if (color) {
-      cell.classList.add('has-entry', color);
-      cell.addEventListener('click', () => showDayDetail(key));
-    }
+    if (color) cell.classList.add('has-entry', color);
+
+    cell.addEventListener('click', () => openDayEditor(key));
     grid.appendChild(cell);
   }
 }
@@ -906,51 +981,158 @@ document.getElementById('cal-prev').addEventListener('click', () => {
   calMonth--;
   if (calMonth < 0) { calMonth = 11; calYear--; }
   renderCalendar();
-  document.getElementById('day-detail').classList.add('hidden');
 });
 document.getElementById('cal-next').addEventListener('click', () => {
   calMonth++;
   if (calMonth > 11) { calMonth = 0; calYear++; }
   renderCalendar();
-  document.getElementById('day-detail').classList.add('hidden');
 });
 document.getElementById('cal-today').addEventListener('click', () => {
   const now = new Date();
   calYear = now.getFullYear();
   calMonth = now.getMonth();
   renderCalendar();
-  showDayDetail(todayKey());
+  openDayEditor(todayKey());
 });
 
-function showDayDetail(key) {
-  const dayEntries = entries.filter(e => dateKey(e.date) === key);
-  const detail = document.getElementById('day-detail');
-  if (!dayEntries.length) { detail.classList.add('hidden'); return; }
+// --- Inline day editor ---
+function openDayEditor(key) {
+  selectedDayKey = key;
+  renderCalendar();
 
-  const d = new Date(key + 'T12:00:00');
-  const dateStr = d.toLocaleDateString(undefined, {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-  });
+  const editor = document.getElementById('day-editor');
+  const dayEntries = entries.filter(e => dateKey(e.date) === key)
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
 
   const color = dayColor(key);
   const badge = color === 'red' ? '🔴 Heavy day'
               : color === 'hard' ? '🟠 Hard day'
-              : '🟢 Good day';
+              : color === 'good' ? '🟢 Good day' : '';
 
-  detail.innerHTML = `
-    <h4>${dateStr} — ${badge}</h4>
-    ${dayEntries.map(e => `
-      <div class="row">
-        <strong>${e.mood === 'good' ? '💚 Good' : '💔 Hard'}</strong>
-        <span style="color:var(--muted);font-size:11px;margin-left:6px;">
-          ${new Date(e.date).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
-        </span>
-        ${e.note ? `<div style="margin-top:4px;">${escapeHtml(e.note)}</div>` : ''}
-        ${e.tags.length ? `<div class="tags-mini">${e.tags.map(t => `<span>${escapeHtml(t)}</span>`).join('')}</div>` : ''}
-      </div>
-    `).join('')}
+  // Build tag chips
+  const tagGroup = (list, cls) => list.map(t =>
+    `<div class="tag ${cls}" data-tag="${escapeHtml(t)}">${escapeHtml(t)}</div>`
+  ).join('');
+
+  const existing = dayEntries.length
+    ? `<div class="existing-entries">
+        <div class="section-title">${dayEntries.length} ${dayEntries.length === 1 ? 'entry' : 'entries'} for this day</div>
+        ${dayEntries.map(e => entryHtml(e)).join('')}
+      </div>`
+    : `<div class="sub">No entries yet — pick a mood below to add one.</div>`;
+
+  editor.innerHTML = `
+    <h3>
+      <span>${escapeHtml(humanDate(key))} ${badge ? '· ' + badge : ''}</span>
+      <button class="close-btn" id="editor-close">Close</button>
+    </h3>
+    ${existing}
+
+    <div class="section-title" style="margin-top:8px;">Add an entry for this day</div>
+
+    <div class="day-picker">
+      <button class="mood-btn good" data-mood="good">
+        <span class="emoji">💚</span>
+        <span>Good day</span>
+      </button>
+      <button class="mood-btn bad" data-mood="bad">
+        <span class="emoji">💔</span>
+        <span>Hard day</span>
+      </button>
+    </div>
+
+    <div style="margin-top:16px;">
+      <div class="group-label">🌱 Healthy signs</div>
+      <div class="tags" data-group="healthy">${tagGroup(HEALTHY_TAGS, 'healthy')}</div>
+
+      <div class="group-label spaced">⚠️ Worth noticing</div>
+      <div class="tags" data-group="warning">${tagGroup(WARNING_TAGS, 'warning')}</div>
+    </div>
+
+    <div style="margin-top:16px;">
+      <textarea id="editor-note" placeholder="Optional note about this day..."></textarea>
+    </div>
+
+    <div class="actions">
+      <button class="ghost" id="editor-clear">Clear</button>
+      <button class="primary" id="editor-save" disabled>Save to ${escapeHtml(humanDate(key).split(',')[0])}</button>
+    </div>
   `;
-  detail.classList.remove('hidden');
+
+  editor.classList.remove('hidden');
+
+  // Wire up editor
+  const edMoodBtns = editor.querySelectorAll('.mood-btn');
+  const edTags = editor.querySelectorAll('.tag');
+  const edSave = editor.querySelector('#editor-save');
+  const edNote = editor.querySelector('#editor-note');
+  const edClear = editor.querySelector('#editor-clear');
+  const edClose = editor.querySelector('#editor-close');
+
+  let edMood = null;
+  const edSelected = new Set();
+
+  function refreshEdSave() { edSave.disabled = !edMood; }
+
+  edMoodBtns.forEach(b => b.addEventListener('click', () => {
+    edMoodBtns.forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    edMood = b.dataset.mood;
+    refreshEdSave();
+  }));
+
+  edTags.forEach(t => t.addEventListener('click', () => {
+    const val = t.dataset.tag;
+    if (edSelected.has(val)) { edSelected.delete(val); t.classList.remove('selected'); }
+    else { edSelected.add(val); t.classList.add('selected'); }
+  }));
+
+  edClear.addEventListener('click', () => {
+    edMood = null;
+    edSelected.clear();
+    edMoodBtns.forEach(x => x.classList.remove('active'));
+    edTags.forEach(x => x.classList.remove('selected'));
+    edNote.value = '';
+    refreshEdSave();
+  });
+
+  edClose.addEventListener('click', () => {
+    selectedDayKey = null;
+    editor.classList.add('hidden');
+    renderCalendar();
+  });
+
+  edSave.addEventListener('click', () => {
+    if (!edMood) return;
+    entries.unshift({
+      id: Date.now(),
+      date: isoForDay(key),
+      mood: edMood,
+      tags: [...edSelected],
+      note: edNote.value.trim()
+    });
+    entries.sort((a, b) => new Date(b.date) - new Date(a.date));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+
+    // Re-open editor with refreshed data
+    openDayEditor(key);
+    renderTimeline();
+    renderReflect();
+    toast(`Saved for ${humanDate(key).split(',')[0]} 💾`);
+  });
+
+  // Wire delete buttons in the existing list
+  editor.querySelectorAll('.existing-entries .delete').forEach(btn => {
+    btn.addEventListener('click', () => {
+      entries = entries.filter(e => e.id !== Number(btn.dataset.id));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+      openDayEditor(key);
+      renderTimeline();
+      renderReflect();
+    });
+  });
+
+  refreshEdSave();
 }
 
 // --- Reflect ---
@@ -958,8 +1140,7 @@ function renderReflect() {
   const healthyCounts = {};
   const warningCounts = {};
   entries.forEach(e => e.tags.forEach(t => {
-    const isWarning = document.querySelector(`.tag.warning[data-tag="${CSS.escape(t)}"]`);
-    if (isWarning) warningCounts[t] = (warningCounts[t] || 0) + 1;
+    if (WARNING_TAGS.includes(t)) warningCounts[t] = (warningCounts[t] || 0) + 1;
     else healthyCounts[t] = (healthyCounts[t] || 0) + 1;
   }));
 
@@ -1025,17 +1206,12 @@ loadSafety();
 // --- Export / Import / Reset ---
 document.getElementById('export-btn').addEventListener('click', () => {
   const safety = JSON.parse(localStorage.getItem(SAFETY_KEY) || '{}');
-  const payload = {
-    version: 1,
-    exportedAt: new Date().toISOString(),
-    entries,
-    safety
-  };
+  const payload = { version: 1, exportedAt: new Date().toISOString(), entries, safety };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `us-tracker-${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = `us-tracker-${todayKey()}.json`;
   a.click();
   URL.revokeObjectURL(url);
   toast('Exported ⬇');
@@ -1059,10 +1235,7 @@ document.getElementById('import-file').addEventListener('change', (ev) => {
       let added = 0;
       incoming.forEach(en => {
         if (!en || typeof en !== 'object' || !en.date || !en.mood) return;
-        if (!byId.has(en.id)) {
-          byId.set(en.id, en);
-          added++;
-        }
+        if (!byId.has(en.id)) { byId.set(en.id, en); added++; }
       });
       entries = [...byId.values()].sort((a, b) => new Date(b.date) - new Date(a.date));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
@@ -1100,6 +1273,8 @@ document.getElementById('reset-btn').addEventListener('click', () => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
+    selectedDayKey = null;
+    document.getElementById('day-editor').classList.add('hidden');
     renderTimeline();
     renderReflect();
     renderCalendar();
@@ -1117,14 +1292,14 @@ function toast(msg) {
   toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
 }
 
-// --- Keyboard shortcut ---
+// --- Keyboard shortcuts (1 / 2) — works in Today view only ---
 document.addEventListener('keydown', (e) => {
   const logView = document.getElementById('view-log').classList.contains('active');
   if (!logView) return;
   const tag = e.target.tagName;
   if (tag === 'TEXTAREA' || tag === 'INPUT') return;
-  if (e.key === '1') document.querySelector('.mood-btn.good').click();
-  if (e.key === '2') document.querySelector('.mood-btn.bad').click();
+  if (e.key === '1') document.querySelector('#view-log .mood-btn.good').click();
+  if (e.key === '2') document.querySelector('#view-log .mood-btn.bad').click();
 });
 
 // --- Init ---
