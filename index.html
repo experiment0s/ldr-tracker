@@ -55,6 +55,21 @@
     border: 1px solid rgba(255, 143, 171, 0.1);
   }
 
+    .tag.warning[data-tag="Yelling"],
+  .tag.warning[data-tag="Accusations"],
+  .tag.warning[data-tag="DARVO"],
+  .tag.warning[data-tag="Rage quitting"] {
+    background: #fff1f2;
+    border-color: #fecdd3;
+  }
+  .tag.warning[data-tag="Yelling"].selected,
+  .tag.warning[data-tag="Accusations"].selected,
+  .tag.warning[data-tag="DARVO"].selected,
+  .tag.warning[data-tag="Rage quitting"].selected {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: white;
+  }
   .day-picker {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -301,20 +316,65 @@
       </div>
     </div>
 
-    <div class="card" id="tags-card">
+       <div class="card" id="tags-card">
       <div class="section-title">What stood out?</div>
-      <div id="tags-healthy">
-        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">🌱 Healthy signs</div>
-        <div class="tags" data-group="healthy">
-          <div class="tag healthy" data-tag="Felt heard">Felt heard</div>
-          <div class="tag healthy" data-tag="Quality time">Quality time</div>
-          <div class="tag healthy" data-tag="Laughed together">Laughed together</div>
-          <div class="tag healthy" data-tag="Supported me">Supported me</div>
-          <div class="tag healthy" data-tag="Respected boundaries">Respected boundaries</div>
-          <div class="tag healthy" data-tag="Honest talk">Honest talk</div>
-          <div class="tag healthy" data-tag="Missed them (good)">Missed them (good)</div>
-        </div>
+
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">🌱 Healthy signs</div>
+      <div class="tags" data-group="healthy">
+        <div class="tag healthy" data-tag="Felt heard">Felt heard</div>
+        <div class="tag healthy" data-tag="Kept my context">Kept my context</div>
+        <div class="tag healthy" data-tag="Followed through">Followed through</div>
+        <div class="tag healthy" data-tag="Quality time">Quality time</div>
+        <div class="tag healthy" data-tag="Laughed together">Laughed together</div>
+        <div class="tag healthy" data-tag="Supported me">Supported me</div>
+        <div class="tag healthy" data-tag="Respected boundaries">Respected boundaries</div>
+        <div class="tag healthy" data-tag="Honest talk">Honest talk</div>
+        <div class="tag healthy" data-tag="Told me the truth, even when hard">Told me the truth, even when hard</div>
+        <div class="tag healthy" data-tag="Reassured without being asked">Reassured without being asked</div>
+        <div class="tag healthy" data-tag="Showed up on a bad day">Showed up on a bad day</div>
+        <div class="tag healthy" data-tag="Kept me included">Kept me included in their day</div>
+        <div class="tag healthy" data-tag="Respected my other life">Respected my other life</div>
+        <div class="tag healthy" data-tag="Made time zones work">Made time zones work</div>
+        <div class="tag healthy" data-tag="Planned something to look forward to">Planned something to look forward to</div>
+        <div class="tag healthy" data-tag="Owned a mistake">Owned a mistake / apologized</div>
+        <div class="tag healthy" data-tag="Checked in on me">Checked in on me</div>
+        <div class="tag healthy" data-tag="Kept intimacy alive">Kept intimacy alive</div>
+        <div class="tag healthy" data-tag="Missed them (good)">Missed them (good)</div>
       </div>
+
+      <div style="font-size:12px;color:var(--muted);margin:16px 0 8px;">🌿 What I did today</div>
+      <div class="tags" data-group="healthy">
+        <div class="tag healthy" data-tag="I reached out first">Reached out first</div>
+        <div class="tag healthy" data-tag="I was honest about my feelings">Was honest about my feelings</div>
+        <div class="tag healthy" data-tag="I asked a real question">Asked a real question</div>
+        <div class="tag healthy" data-tag="I made time for them">Made time for them</div>
+        <div class="tag healthy" data-tag="I gave space">Gave space when needed</div>
+        <div class="tag healthy" data-tag="I apologized">Apologized for something</div>
+        <div class="tag healthy" data-tag="I planned something">Planned something</div>
+        <div class="tag healthy" data-tag="I let them in">Let them in on my day</div>
+        <div class="tag healthy" data-tag="I stayed grounded">Stayed grounded in a hard moment</div>
+      </div>
+
+      <div style="font-size:12px;color:var(--muted);margin:16px 0 8px;">⚠️ Worth noticing</div>
+      <div class="tags" data-group="warning">
+        <div class="tag warning" data-tag="Felt dismissed">Felt dismissed</div>
+        <div class="tag warning" data-tag="Silent treatment">Silent treatment</div>
+        <div class="tag warning" data-tag="Jealousy/control">Jealousy / control</div>
+        <div class="tag warning" data-tag="Guilt-tripped">Guilt-tripped</div>
+        <div class="tag warning" data-tag="Kept score">Kept score</div>
+        <div class="tag warning" data-tag="Gaslighting feeling">Felt gaslit</div>
+        <div class="tag warning" data-tag="Anxious after call">Anxious after call</div>
+        <div class="tag warning" data-tag="Walked on eggshells">Walked on eggshells</div>
+        <div class="tag warning" data-tag="Yelling">Yelling</div>
+        <div class="tag warning" data-tag="Accusations">Accusations</div>
+        <div class="tag warning" data-tag="DARVO">DARVO</div>
+        <div class="tag warning" data-tag="Rage quitting">Rage quitting</div>
+      </div>
+
+      <div id="darvo-hint" style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5;">
+        <strong>DARVO</strong> = Deny, Attack, Reverse Victim &amp; Offender — when you raise a concern and end up the one apologizing.
+      </div>
+    </div>
       <div id="tags-warning" style="margin-top:16px;">
         <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">⚠️ Worth noticing</div>
         <div class="tags" data-group="warning">
