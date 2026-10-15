@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Us · A Space for Two</title>
+<style>
+  :root {
+    --bg: #fdf6f9;
+    --card: #ffffff;
+    --pink: #ff8fab;
+    --pink-soft: #ffd6e0;
+    --purple: #a78bfa;
+    --green: #86efac;
+    --green-soft: #dcfce7;
+    --red: #fca5a5;
+    --red-soft: #fee2e2;
+    --yellow: #fde68a;
+    --text: #2d1b2e;
+    --muted: #8b6b85;
+    --shadow: 0 4px 24px rgba(255, 143, 171, 0.15);
+    --shadow-lg: 0 12px 40px rgba(255, 143, 171, 0.25);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(160deg, #fff0f5 0%, #f3e8ff 100%);
+    min-height: 100vh;
+    color: var(--text);
+    padding: 24px 16px 100px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app { max-width: 720px; margin: 0 auto; }
+
+  header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  header h1 {
+    font-size: 32px;
+    background: linear-gradient(90deg, var(--pink), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+  }
+  header p { color: var(--muted); font-size: 14px; }
+
+  .card {
+    background: var(--card);
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    border: 1px solid rgba(255, 143, 171, 0.1);
+  }
+
+  .day-picker {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 8px;
+  }
+  .mood-btn {
+    padding: 28px 16px;
+    border-radius: 20px;
+    border: 2px solid transparent;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .mood-btn .emoji { font-size: 36px; }
+  .mood-btn.good { background: var(--green-soft); color: #166534; }
+  .mood-btn.good:hover, .mood-btn.good.active {
+    background: var(--green); border-color: #22c55e; transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(134, 239, 172, 0.4);
+  }
+  .mood-btn.bad { background: var(--red-soft); color: #991b1b; }
+  .mood-btn.bad:hover, .mood-btn.bad.active {
+    background: var(--red); border-color: #ef4444; transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(252, 165, 165, 0.4);
+  }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .tag {
+    padding: 8px 14px;
+    border-radius: 100px;
+    background: #faf5ff;
+    border: 1.5px solid #ede9fe;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .tag:hover { border-color: var(--purple); }
+  .tag.selected {
+    background: var(--purple);
+    color: white;
+    border-color: var(--purple);
+  }
+  .tag.healthy.selected { background: #16a34a; border-color: #16a34a; }
+  .tag.warning.selected { background: #f59e0b; border-color: #f59e0b; color: #fff; }
+
+  textarea {
+    width: 100%;
+    min-height: 90px;
+    padding: 14px;
+    border-radius: 16px;
+    border: 1.5px solid #f3e8ff;
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+    outline: none;
+    transition: border 0.2s;
+    background: #fdfbff;
+  }
+  textarea:focus { border-color: var(--pink); }
+
+  .actions { display: flex; gap: 12px; margin-top: 16px; }
+  button.primary {
+    flex: 1;
+    padding: 16px;
+    border-radius: 16px;
+    border: none;
+    background: linear-gradient(90deg, var(--pink), var(--purple));
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  button.primary:hover { transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+  button.primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  button.ghost {
+    padding: 16px 20px;
+    border-radius: 16px;
+    border: 1.5px solid #f3e8ff;
+    background: white;
+    color: var(--muted);
+    font-size: 14px;
+    cursor: pointer;
+  }
+  button.ghost:hover { border-color: var(--pink); color: var(--pink); }
+
+  /* Stats */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .stat {
+    text-align: center;
+    padding: 16px 8px;
+    border-radius: 16px;
+    background: #fdfbff;
+  }
+  .stat .num { font-size: 26px; font-weight: 700; }
+  .stat.good .num { color: #16a34a; }
+  .stat.bad .num { color: #dc2626; }
+  .stat.neutral .num { color: var(--purple); }
+  .stat .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+  .balance-bar {
+    height: 12px;
+    border-radius: 100px;
+    background: #fee2e2;
+    overflow: hidden;
+    margin-top: 16px;
+  }
+  .balance-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e, #86efac);
+    transition: width 0.4s ease;
+  }
+
+  /* Timeline */
+  .entry {
+    display: flex;
+    gap: 12px;
+    padding: 14px;
+    border-radius: 16px;
+    background: #fdfbff;
+    margin-bottom: 10px;
+    border-left: 4px solid var(--pink-soft);
+  }
+  .entry.good { border-left-color: #22c55e; }
+  .entry.bad { border-left-color: #ef4444; }
+  .entry .date { font-size: 12px; color: var(--muted); min-width: 70px; }
+  .entry .content { flex: 1; }
+  .entry .content .tags-mini { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .entry .content .tags-mini span {
+    font-size: 11px; padding: 2px 8px; border-radius: 100px;
+    background: #f3e8ff; color: #6b21a8;
+  }
+  .entry .note { font-size: 13px; margin-top: 4px; color: #4a3347; }
+  .entry .delete {
+    background: none; border: none; color: #d1c4cf; cursor: pointer;
+    font-size: 16px; padding: 0 4px; align-self: flex-start;
+  }
+  .entry .delete:hover { color: #ef4444; }
+
+  /* Warning */
+  .warning {
+    background: #fffbeb;
+    border: 1.5px solid #fde68a;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .warning h3 { color: #b45309; font-size: 15px; margin-bottom: 8px; }
+  .warning p { font-size: 13px; color: #78350f; line-height: 1.5; margin-bottom: 6px; }
+  .warning ul { padding-left: 20px; font-size: 13px; color: #78350f; line-height: 1.6; }
+
+  .empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .empty .emoji { font-size: 40px; display: block; margin-bottom: 8px; opacity: 0.5; }
+
+  .tabs {
+    display: flex;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 6px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+  }
+  .tab {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab.active {
+    background: white;
+    color: var(--pink);
+    box-shadow: 0 2px 8px rgba(255, 143, 171, 0.15);
+  }
+
+  .view { display: none; }
+  .view.active { display: block; animation: fadeIn 0.3s; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Us 💕</h1>
+    <p>A quiet space to notice how things really are</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-view="log">Today</button>
+    <button class="tab" data-view="timeline">Timeline</button>
+    <button class="tab" data-view="reflect">Reflect</button>
+  </div>
+
+  <!-- LOG VIEW -->
+  <div class="view active" id="view-log">
+    <div class="card">
+      <div class="section-title">How was today?</div>
+      <div class="day-picker">
+        <button class="mood-btn good" data-mood="good">
+          <span class="emoji">💚</span>
+          <span>Good day</span>
+        </button>
+        <button class="mood-btn bad" data-mood="bad">
+          <span class="emoji">💔</span>
+          <span>Hard day</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="card" id="tags-card">
+      <div class="section-title">What stood out?</div>
+      <div id="tags-healthy">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">🌱 Healthy signs</div>
+        <div class="tags" data-group="healthy">
+          <div class="tag healthy" data-tag="Felt heard">Felt heard</div>
+          <div class="tag healthy" data-tag="Quality time">Quality time</div>
+          <div class="tag healthy" data-tag="Laughed together">Laughed together</div>
+          <div class="tag healthy" data-tag="Supported me">Supported me</div>
+          <div class="tag healthy" data-tag="Respected boundaries">Respected boundaries</div>
+          <div class="tag healthy" data-tag="Honest talk">Honest talk</div>
+          <div class="tag healthy" data-tag="Missed them (good)">Missed them (good)</div>
+        </div>
+      </div>
+      <div id="tags-warning" style="margin-top:16px;">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">⚠️ Worth noticing</div>
+        <div class="tags" data-group="warning">
+          <div class="tag warning" data-tag="Felt dismissed">Felt dismissed</div>
+          <div class="tag warning" data-tag="Silent treatment">Silent treatment</div>
+          <div class="tag warning" data-tag="Jealousy/control">Jealousy / control</div>
+          <div class="tag warning" data-tag="Guilt-tripped">Guilt-tripped</div>
+          <div class="tag warning" data-tag="Kept score">Kept score</div>
+          <div class="tag warning" data-tag="Gaslighting feeling">Felt gaslit</div>
+          <div class="tag warning" data-tag="Anxious after call">Anxious after call</div>
+          <div class="tag warning" data-tag="Walked on eggshells">Walked on eggshells</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">A note to yourself (optional)</div>
+      <textarea id="note" placeholder="What happened? How did you feel? No one else sees this."></textarea>
+      <div class="actions">
+        <button class="ghost" id="clear-btn">Clear</button>
+        <button class="primary" id="save-btn" disabled>Save today</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIMELINE VIEW -->
+  <div class="view" id="view-timeline">
+    <div class="card">
+      <div class="section-title">The balance</div>
+      <div class="stats">
+        <div class="stat good">
+          <div class="num" id="stat-good">0</div>
+          <div class="label">Good</div>
+        </div>
+        <div class="stat bad">
+          <div class="num" id="stat-bad">0</div>
+          <div class="label">Hard</div>
+        </div>
+        <div class="stat neutral">
+          <div class="num" id="stat-streak">0</div>
+          <div class="label">Day streak</div>
+        </div>
+      </div>
+      <div class="balance-bar"><div class="balance-fill" id="balance-fill" style="width:0%"></div></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px;text-align:center;" id="balance-text">No entries yet</div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Recent entries</div>
+      <div id="entries-list"></div>
+    </div>
+  </div>
+
+  <!-- REFLECT VIEW -->
+  <div class="view" id="view-reflect">
+    <div class="card">
+      <div class="section-title">A gentle check-in</div>
+      <p style="font-size:14px;line-height:1.7;color:#4a3347;">
+        This isn't a diagnosis. It's a mirror. If you're seeing more ⚠️ than 🌱 over time,
+        that's worth paying attention to — not because a tracker says so, but because <em>you</em> noticed.
+      </p>
+    </div>
+
+    <div class="warning hidden" id="reflect-warning">
+      <h3>⚠️ A pattern worth sitting with</h3>
+      <p>In your recent entries, warning signs are showing up more often than healthy ones. That doesn't mean the relationship is bad — but it might mean something needs to change, or you need support.</p>
+      <p style="margin-top:10px;"><strong>Things that are never okay, even in a bad mood:</strong></p>
+      <ul>
+        <li>Being afraid of your partner's reactions</li>
+        <li>Being monitored, tracked, or isolated from friends</li>
+        <li>Being told your reality isn't real (gaslighting)</li>
+        <li>Threats, name-calling, or any physical intimidation</li>
+        <li>Feeling you have to earn basic kindness</li>
+      </ul>
+      <p style="margin-top:12px;font-size:12px;color:#92400e;">
+        If any of this feels familiar, please reach out — a friend, a therapist, or a hotline.
+        You deserve to feel safe. 💗
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Healthy signs you've logged</div>
+      <div id="healthy-summary" class="empty"><span class="emoji">🌱</span>Nothing yet — log a few days first.</div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Warning signs you've logged</div>
+      <div id="warning-summary" class="empty"><span class="emoji">⚠️</span>Nothing yet.</div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Data</div>
+      <div class="actions">
+        <button class="ghost" id="export-btn" style="flex:1;">Export JSON</button>
+        <button class="ghost" id="reset-btn" style="flex:1;color:#dc2626;">Reset all</button>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-top:12px;text-align:center;">
+        Everything is stored only in this browser. Nothing is sent anywhere.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'ldr-tracker-entries-v1';
+
+let entries = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+let currentMood = null;
+let currentTags = new Set();
+
+// --- Tabs ---
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('view-' + tab.dataset.view).classList.add('active');
+    if (tab.dataset.view === 'timeline') renderTimeline();
+    if (tab.dataset.view === 'reflect') renderReflect();
+  });
+});
+
+// --- Mood picker ---
+document.querySelectorAll('.mood-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentMood = btn.dataset.mood;
+    updateSaveBtn();
+  });
+});
+
+// --- Tags ---
+document.querySelectorAll('.tag').forEach(tag => {
+  tag.addEventListener('click', () => {
+    const t = tag.dataset.tag;
+    if (currentTags.has(t)) { currentTags.delete(t); tag.classList.remove('selected'); }
+    else { currentTags.add(t); tag.classList.add('selected'); }
+  });
+});
+
+// --- Save ---
+const saveBtn = document.getElementById('save-btn');
+function updateSaveBtn() { saveBtn.disabled = !currentMood; }
+
+saveBtn.addEventListener('click', () => {
+  if (!currentMood) return;
+  const note = document.getElementById('note').value.trim();
+  entries.unshift({
+    id: Date.now(),
+    date: new Date().toISOString(),
+    mood: currentMood,
+    tags: [...currentTags],
+    note
+  });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  resetForm();
+  // little feedback
+  saveBtn.textContent = '✓ Saved';
+  setTimeout(() => { saveBtn.textContent = 'Save today'; }, 1200);
+});
+
+function resetForm() {
+  currentMood = null;
+  currentTags.clear();
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tag').forEach(t => t.classList.remove('selected'));
+  document.getElementById('note').value = '';
+  updateSaveBtn();
+}
+document.getElementById('clear-btn').addEventListener('click', resetForm);
+
+// --- Timeline render ---
+function renderTimeline() {
+  const good = entries.filter(e => e.mood === 'good').length;
+  const bad = entries.filter(e => e.mood === 'bad').length;
+  document.getElementById('stat-good').textContent = good;
+  document.getElementById('stat-bad').textContent = bad;
+  document.getElementById('stat-streak').textContent = calcStreak();
+
+  const total = good + bad;
+  const pct = total ? Math.round((good / total) * 100) : 0;
+  document.getElementById('balance-fill').style.width = pct + '%';
+  document.getElementById('balance-text').textContent = total
+    ? `${pct}% of logged days were good`
+    : 'No entries yet';
+
+  const list = document.getElementById('entries-list');
+  if (!entries.length) {
+    list.innerHTML = '<div class="empty"><span class="emoji">🌙</span>No entries yet. Start with today.</div>';
+    return;
+  }
+  list.innerHTML = entries.slice(0, 60).map(e => {
+    const d = new Date(e.date);
+    const dateStr = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    const timeStr = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    const tagsHtml = e.tags.length
+      ? `<div class="tags-mini">${e.tags.map(t => `<span>${escapeHtml(t)}</span>`).join('')}</div>`
+      : '';
+    const noteHtml = e.note ? `<div class="note">${escapeHtml(e.note)}</div>` : '';
+    return `<div class="entry ${e.mood}">
+      <div class="date">${dateStr}<br><span style="opacity:.6">${timeStr}</span></div>
+      <div class="content">
+        <div style="font-size:13px;font-weight:600;">${e.mood === 'good' ? '💚 Good day' : '💔 Hard day'}</div>
+        ${noteHtml}${tagsHtml}
+      </div>
+      <button class="delete" data-id="${e.id}">✕</button>
+    </div>`;
+  }).join('');
+
+  list.querySelectorAll('.delete').forEach(btn => {
+    btn.addEventListener('click', () => {
+      entries = entries.filter(e => e.id !== Number(btn.dataset.id));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+      renderTimeline();
+    });
+  });
+}
+
+function calcStreak() {
+  if (!entries.length) return 0;
+  // unique days
+  const days = new Set(entries.map(e => e.date.slice(0, 10)));
+  let streak = 0;
+  const today = new Date();
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    if (days.has(key)) streak++;
+    else if (i > 0) break;
+  }
+  return streak;
+}
+
+// --- Reflect ---
+function renderReflect() {
+  const healthyCounts = {};
+  const warningCounts = {};
+  entries.forEach(e => e.tags.forEach(t => {
+    // We don't store category, so look up
+    const isWarning = document.querySelector(`.tag.warning[data-tag="${CSS.escape(t)}"]`);
+    if (isWarning) warningCounts[t] = (warningCounts[t] || 0) + 1;
+    else healthyCounts[t] = (healthyCounts[t] || 0) + 1;
+  }));
+
+  const healthyTotal = Object.values(healthyCounts).reduce((a,b)=>a+b,0);
+  const warningTotal = Object.values(warningCounts).reduce((a,b)=>a+b,0);
+
+  document.getElementById('reflect-warning').classList.toggle(
+    'hidden',
+    warningTotal <= healthyTotal || entries.length < 3
+  );
+
+  document.getElementById('healthy-summary').innerHTML = healthyTotal
+    ? Object.entries(healthyCounts).sort((a,b)=>b[1]-a[1])
+        .map(([k,v]) => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f3e8ff;"><span>🌱 ${escapeHtml(k)}</span><strong style="color:#16a34a;">${v}</strong></div>`).join('')
+    : '<div class="empty"><span class="emoji">🌱</span>Nothing yet — log a few days first.</div>';
+
+  document.getElementById('warning-summary').innerHTML = warningTotal
+    ? Object.entries(warningCounts).sort((a,b)=>b[1]-a[1])
+        .map(([k,v]) => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #fef3c7;"><span>⚠️ ${escapeHtml(k)}</span><strong style="color:#dc2626;">${v}</strong></div>`).join('')
+    : '<div class="empty"><span class="emoji">⚠️</span>Nothing yet.</div>';
+}
+
+// --- Export / Reset ---
+document.getElementById('export-btn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(entries, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `us-tracker-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('reset-btn').addEventListener('click', () => {
+  if (confirm('Delete all entries? This cannot be undone.')) {
+    entries = [];
+    localStorage.setItem(STORAGE_KEY, '[]');
+    renderTimeline();
+    renderReflect();
+  }
+});
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+updateSaveBtn();
+</script>
+</body>
+</html>
